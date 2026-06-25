@@ -68,7 +68,7 @@ const LLM_SYSTEM_PROMPT =
   `- Never add explanations, markdown, or extra lines.\n` +
   `- Extract only the relevant value (e.g. for name, extract just the name).\n` +
   `- Normalise names to Title Case.\n` +
-  `- Normalise loan amounts to "<number> <unit>" (e.g. "30 lakhs").\n\n` +
+  `- Normalise loan amounts to "<number> lakh" or "<number> crore" (singular, e.g. "50 lakh", "1.5 crore"). Convert written numbers (e.g. "fifty") to digits (e.g. "50"). Normalise pure numbers (e.g. "5000000" becomes "50 lakh").\n\n` +
   `Examples:\n` +
   `Type: name    | Input: "My name is Rahul"         → VALID: Rahul\n` +
   `Type: name    | Input: "I'm Rohan Sharma"          → VALID: Rohan Sharma\n` +
@@ -76,10 +76,29 @@ const LLM_SYSTEM_PROMPT =
   `Type: name    | Input: "I didn't understand"       → INVALID\n` +
   `Type: name    | Input: "Help"                      → INVALID\n` +
   `Type: name    | Input: "Sorry"                     → INVALID\n` +
-  `Type: loan_amount | Input: "around 30 lakhs"       → VALID: 30 lakhs\n` +
-  `Type: loan_amount | Input: "approximately twenty lakhs" → VALID: 20 lakhs\n` +
-  `Type: loan_amount | Input: "I need 40L"            → VALID: 40 lakhs\n` +
+  `Type: loan_amount | Input: "5000000"               → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "50 lakh"               → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "50 lakhs"              → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "₹50 lakh"              → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "Rs. 50 lakh"           → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "INR 50 lakh"           → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "50L"                   → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "0.5 crore"             → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "1 crore"               → VALID: 1 crore\n` +
+  `Type: loan_amount | Input: "fifty lakh"            → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "fifty lakhs"           → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "fifty lakh rupees"     → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "around fifty lakh"     → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "one crore"             → VALID: 1 crore\n` +
+  `Type: loan_amount | Input: "one and a half crore"  → VALID: 1.5 crore\n` +
+  `Type: loan_amount | Input: "seventy five lakh"     → VALID: 75 lakh\n` +
+  `Type: loan_amount | Input: "I need around fifty lakh" → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "My budget is one crore" → VALID: 1 crore\n` +
+  `Type: loan_amount | Input: "About 40 lakhs"        → VALID: 40 lakh\n` +
+  `Type: loan_amount | Input: "Loan amount is fifty lakh rupees" → VALID: 50 lakh\n` +
+  `Type: loan_amount | Input: "What?"                 → INVALID\n` +
   `Type: loan_amount | Input: "I don't know"          → INVALID\n` +
+  `Type: loan_amount | Input: "asdfgh"                → INVALID\n` +
   `Type: email   | Input: "rahul@example.com"         → VALID: rahul@example.com\n` +
   `Type: phone   | Input: "9876543210"                → VALID: 9876543210\n` +
   `Type: course  | Input: "I want to do MBA"          → VALID: MBA\n` +
@@ -319,7 +338,23 @@ function localValidateLoanAmount(input: string): CollectValidation | null {
       normalizedUnit === "lac" ||
       normalizedUnit === "lacs"
     ) {
-      normalizedUnit = "lakhs";
+      normalizedUnit = "lakh";
+    } else if (
+      normalizedUnit === "cr" ||
+      normalizedUnit === "crore" ||
+      normalizedUnit === "crores"
+    ) {
+      normalizedUnit = "crore";
+    } else if (
+      normalizedUnit === "k" ||
+      normalizedUnit === "thousand"
+    ) {
+      normalizedUnit = "thousand";
+    } else if (
+      normalizedUnit === "m" ||
+      normalizedUnit === "million"
+    ) {
+      normalizedUnit = "million";
     }
     return { valid: true, value: `${num} ${normalizedUnit}` };
   }
