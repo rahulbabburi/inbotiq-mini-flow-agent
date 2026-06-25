@@ -368,60 +368,53 @@ describe("validateCollect — LLM output parsing", () => {
 describe("validateCollect — loan_amount natural language and word formats", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test("'fifty lakh' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 50 lakh");
+  test("'fifty lakh' → valid (local)", async () => {
     const r = await validateCollect("fifty lakh", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("50 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'fifty lakh rupees' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 50 lakh");
+  test("'fifty lakh rupees' → valid (local)", async () => {
     const r = await validateCollect("fifty lakh rupees", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("50 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'one crore' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 1 crore");
+  test("'one crore' → valid (local)", async () => {
     const r = await validateCollect("one crore", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("1 crore");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'one and a half crore' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 1.5 crore");
+  test("'one and a half crore' → valid (local)", async () => {
     const r = await validateCollect("one and a half crore", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("1.5 crore");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'two crore' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 2 crore");
+  test("'two crore' → valid (local)", async () => {
     const r = await validateCollect("two crore", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("2 crore");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'seventy five lakh' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 75 lakh");
+  test("'seventy five lakh' → valid (local)", async () => {
     const r = await validateCollect("seventy five lakh", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("75 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'twenty five lakh' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 25 lakh");
+  test("'twenty five lakh' → valid (local)", async () => {
     const r = await validateCollect("twenty five lakh", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("25 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
   test("'₹50 lakh' → valid (local)", async () => {
@@ -445,35 +438,31 @@ describe("validateCollect — loan_amount natural language and word formats", ()
     expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'around fifty lakh' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 50 lakh");
+  test("'around fifty lakh' → valid (local)", async () => {
     const r = await validateCollect("around fifty lakh", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("50 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'approximately twenty lakh' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 20 lakh");
+  test("'approximately twenty lakh' → valid (local)", async () => {
     const r = await validateCollect("approximately twenty lakh", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("20 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'my budget is one crore' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 1 crore");
+  test("'my budget is one crore' → valid (local)", async () => {
     const r = await validateCollect("my budget is one crore", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("1 crore");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 
-  test("'I need about fifty lakh' → valid (LLM)", async () => {
-    (callLLM as jest.Mock).mockResolvedValue("VALID: 50 lakh");
+  test("'I need about fifty lakh' → valid (local)", async () => {
     const r = await validateCollect("I need about fifty lakh", "loan_amount");
     expect(r.valid).toBe(true);
     expect(r.value).toBe("50 lakh");
-    expect(callLLM).toHaveBeenCalledTimes(1);
+    expect(callLLM).not.toHaveBeenCalled();
   });
 });
