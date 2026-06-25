@@ -1,0 +1,44 @@
+{
+  "startNode": "check_person",
+  "nodes": [
+    {
+      "id": "check_person",
+      "type": "condition",
+      "question": "Hi! Are you the right person to talk to about your home loan enquiry?",
+      "branches": {
+        "YES": "ask_budget",
+        "NO": "goodbye"
+      }
+    },
+    {
+      "id": "ask_budget",
+      "type": "collect",
+      "question": "Great! Roughly what loan amount are you looking for?",
+      "variable": "budget",
+      "expectedType": "loan_amount",
+      "retryMessage": "I'm sorry, I didn't catch the loan amount. Could you tell me approximately how much loan you're looking for?",
+      "next": "ask_name"
+    },
+    {
+      "id": "ask_name",
+      "type": "collect",
+      "question": "Perfect. And what's the best name to put on the file?",
+      "variable": "name",
+      "expectedType": "name",
+      "retryMessage": "I'm sorry, I didn't catch your name. Could you please tell me your full name?",
+      "next": "confirmation"
+    },
+    {
+      "id": "confirmation",
+      "type": "prompt",
+      "message": "Thanks {{name}} — someone will call you about your {{budget}} enquiry shortly. 📞",
+      "next": null
+    },
+    {
+      "id": "goodbye",
+      "type": "prompt",
+      "message": "No problem at all! If you know who handles this, feel free to have them reach out to us. Have a great day! 👋",
+      "next": null
+    }
+  ]
+}

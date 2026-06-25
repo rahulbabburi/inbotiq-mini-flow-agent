@@ -1,0 +1,66 @@
+{
+  "nodes": [
+    {
+      "id": "welcome",
+      "type": "prompt",
+      "message": "👋 Hello! Welcome to the **College Admission Assistant**.\n\nI'm here to help you with your admission enquiry and guide you through the process.\n\nAre you interested in learning more about our programs and applying for admission?",
+      "next": "askInterest"
+    },
+    {
+      "id": "askInterest",
+      "type": "condition",
+      "question": "Are you interested in applying for admission? (Yes / No)",
+      "branches": {
+        "YES": "askName",
+        "NO": "goodbye",
+        "UNCLEAR": "askInterestAgain"
+      }
+    },
+    {
+      "id": "askInterestAgain",
+      "type": "prompt",
+      "message": "🙏 I'm sorry, I didn't quite understand that.\n\nCould you please answer with **yes** or **no**?\n\nAre you interested in applying for admission?",
+      "next": "askInterest"
+    },
+    {
+      "id": "askName",
+      "type": "collect",
+      "question": "Great! Let's get started. 😊\n\nWhat is your **full name**?",
+      "variable": "name",
+      "expectedType": "person_name",
+      "retryMessage": "I'm sorry, I didn't catch your name. 😊\n\nCould you please tell me your **full name**? (e.g., Rahul Sharma)",
+      "next": "askEmail"
+    },
+    {
+      "id": "askEmail",
+      "type": "collect",
+      "question": "Nice to meet you, **{{name}}**! 🎓\n\nPlease share your **email address** so we can send you further details.",
+      "variable": "email",
+      "expectedType": "email",
+      "retryMessage": "That doesn't look like a valid email address. 📧\n\nCould you please provide a valid email? (e.g., yourname@example.com)",
+      "next": "askCourse"
+    },
+    {
+      "id": "askCourse",
+      "type": "collect",
+      "question": "Which **course or program** are you interested in applying for?\n\n*(e.g., Computer Science, Business Administration, Data Science, Mechanical Engineering)*",
+      "variable": "course",
+      "expectedType": "course",
+      "retryMessage": "I didn't quite catch the course name. 🎓\n\nCould you please name the **program** you're interested in? (e.g., Computer Science, MBA, Data Science)",
+      "next": "confirmation"
+    },
+    {
+      "id": "confirmation",
+      "type": "prompt",
+      "message": "✅ **All set, {{name}}!**\n\nHere's a summary of your enquiry:\n\n• **Name:** {{name}}\n• **Email:** {{email}}\n• **Course:** {{course}}\n\nOur admissions team will reach out to **{{email}}** within 2–3 business days with next steps for the **{{course}}** program.\n\nThank you for your interest! We look forward to welcoming you. 🌟",
+      "next": null
+    },
+    {
+      "id": "goodbye",
+      "type": "prompt",
+      "message": "No problem at all! 😊\n\nIf you ever change your mind or have questions about our programs, feel free to come back anytime.\n\nWishing you all the best! 👋",
+      "next": null
+    }
+  ],
+  "startNode": "welcome"
+}
