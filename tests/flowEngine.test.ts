@@ -75,7 +75,7 @@ const sampleFlow: Flow = {
       id: "ask_budget",
       type: "collect",
       question: "Great! Roughly what loan amount are you looking for?",
-      variable: "budget",
+      variable: "loanAmount",
       expectedType: "loan_amount",
       retryMessage:
         "I'm sorry, I didn't catch the loan amount. " +
@@ -95,7 +95,7 @@ const sampleFlow: Flow = {
     {
       id: "confirmation",
       type: "prompt",
-      message: "Thanks {{name}} — someone will call you about your {{budget}} enquiry shortly.",
+      message: "Thanks {{name}} — someone will call you about your {{loanAmount}} enquiry shortly.",
       next: null,
     },
     {
@@ -356,7 +356,7 @@ describe("processMessage — collect node: valid budget advances", () => {
       "loan_amount",
       "ask_budget"
     );
-    expect(updatedState.variables.budget).toBe("30 lakhs");
+    expect(updatedState.variables.loanAmount).toBe("30 lakhs");
     expect(updatedState.currentNode).toBe("ask_name");
   });
 
@@ -367,7 +367,7 @@ describe("processMessage — collect node: valid budget advances", () => {
       makeState("ask_budget"),
       "50 crores"
     );
-    expect(updatedState.variables.budget).toBe("50 crores");
+    expect(updatedState.variables.loanAmount).toBe("50 crores");
     expect(updatedState.currentNode).toBe("ask_name");
   });
 
@@ -398,7 +398,7 @@ describe("processMessage — collect node: invalid budget stays on same node", (
     );
 
     expect(updatedState.currentNode).toBe("ask_budget"); // NOT advanced
-    expect(updatedState.variables.budget).toBeUndefined(); // NOT stored
+    expect(updatedState.variables.loanAmount).toBeUndefined(); // NOT stored
     expect(reply).toContain("didn't catch the loan amount");
     expect(classifyIntent).not.toHaveBeenCalled();
   });
@@ -411,7 +411,7 @@ describe("processMessage — collect node: invalid budget stays on same node", (
       "I don't know"
     );
     expect(updatedState.currentNode).toBe("ask_budget");
-    expect(updatedState.variables.budget).toBeUndefined();
+    expect(updatedState.variables.loanAmount).toBeUndefined();
   });
 
   test("Test 5c — invalid then valid → first stays, second advances", async () => {
@@ -431,7 +431,7 @@ describe("processMessage — collect node: invalid budget stays on same node", (
       after1,
       "30 lakhs"
     );
-    expect(after2.variables.budget).toBe("30 lakhs");
+    expect(after2.variables.loanAmount).toBe("30 lakhs");
     expect(after2.currentNode).toBe("ask_name");
   });
 });
@@ -446,7 +446,7 @@ describe("processMessage — collect node: name validation", () => {
     mockValid("Rohan");
     const { updatedState } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "Rohan"
     );
     expect(updatedState.variables.name).toBe("Rohan");
@@ -457,7 +457,7 @@ describe("processMessage — collect node: name validation", () => {
     mockValid("Rohan Sharma");
     const { updatedState } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "rohan sharma"
     );
     expect(updatedState.variables.name).toBe("Rohan Sharma");
@@ -467,7 +467,7 @@ describe("processMessage — collect node: name validation", () => {
     mockValid("Rahul");
     const { updatedState } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "My name is Rahul"
     );
     expect(updatedState.variables.name).toBe("Rahul");
@@ -478,7 +478,7 @@ describe("processMessage — collect node: name validation", () => {
     mockInvalid();
     const { reply, updatedState } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "What?"
     );
     expect(updatedState.currentNode).toBe("ask_name");
@@ -490,7 +490,7 @@ describe("processMessage — collect node: name validation", () => {
     mockInvalid();
     const { updatedState } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "I don't understand"
     );
     expect(updatedState.currentNode).toBe("ask_name");
@@ -501,7 +501,7 @@ describe("processMessage — collect node: name validation", () => {
     mockInvalid();
     const { updatedState } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "Help"
     );
     expect(updatedState.currentNode).toBe("ask_name");
@@ -583,27 +583,27 @@ describe("processMessage — collect node: phone validation", () => {
 describe("processMessage — prompt node: {{variable}} substitution", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test("Test 6 — confirmation replaces {{name}} and {{budget}} correctly", async () => {
+  test("Test 6 — confirmation replaces {{name}} and {{loanAmount}} correctly", async () => {
     const { reply } = await processMessage(
       sampleFlow,
-      makeState("confirmation", { name: "Rohan", budget: "30 lakhs" }),
+      makeState("confirmation", { name: "Rohan", loanAmount: "30 lakhs" }),
       ""
     );
 
     expect(reply).toContain("Rohan");
     expect(reply).toContain("30 lakhs");
     expect(reply).not.toContain("{{name}}");
-    expect(reply).not.toContain("{{budget}}");
+    expect(reply).not.toContain("{{loanAmount}}");
   });
 
   test("prompt with missing variable leaves placeholder unchanged", async () => {
     const { reply } = await processMessage(
       sampleFlow,
-      makeState("confirmation", { name: "Rohan" }), // budget missing
+      makeState("confirmation", { name: "Rohan" }), // loanAmount missing
       ""
     );
     expect(reply).toContain("Rohan");
-    expect(reply).toContain("{{budget}}"); // unresolved, kept as-is
+    expect(reply).toContain("{{loanAmount}}"); // unresolved, kept as-is
   });
 
   test("email + phone substituted in extended flow confirmation", async () => {
@@ -651,7 +651,7 @@ describe("processMessage — full happy path (assignment example)", () => {
       s1,
       "around 30 lakhs"
     );
-    expect(s2.variables.budget).toBe("30 lakhs");
+    expect(s2.variables.loanAmount).toBe("30 lakhs");
     expect(s2.currentNode).toBe("ask_name");
     expect(r2).toContain("name to put on the file");
 
@@ -665,7 +665,7 @@ describe("processMessage — full happy path (assignment example)", () => {
     expect(s3.variables.name).toBe("Rohan");
     expect(s3.currentNode).toBe("confirmation");
 
-    // Confirmation: both {{name}} and {{budget}} substituted
+    // Confirmation: both {{name}} and {{loanAmount}} substituted
     expect(r3).toContain("Rohan");
     expect(r3).toContain("30 lakhs");
     expect(r3).not.toContain("{{");
@@ -690,7 +690,7 @@ describe("processMessage — full happy path (assignment example)", () => {
       "I don't know"
     );
     expect(after1.currentNode).toBe("ask_budget");
-    expect(after1.variables.budget).toBeUndefined();
+    expect(after1.variables.loanAmount).toBeUndefined();
 
     // Valid attempt
     mockValid("30 lakhs");
@@ -699,7 +699,7 @@ describe("processMessage — full happy path (assignment example)", () => {
       after1,
       "30 lakhs"
     );
-    expect(after2.variables.budget).toBe("30 lakhs");
+    expect(after2.variables.loanAmount).toBe("30 lakhs");
     expect(after2.currentNode).toBe("ask_name");
   });
 
@@ -708,7 +708,7 @@ describe("processMessage — full happy path (assignment example)", () => {
     mockInvalid();
     const { updatedState: after1 } = await processMessage(
       sampleFlow,
-      makeState("ask_name", { budget: "30 lakhs" }),
+      makeState("ask_name", { loanAmount: "30 lakhs" }),
       "I didn't understand"
     );
     expect(after1.currentNode).toBe("ask_name");

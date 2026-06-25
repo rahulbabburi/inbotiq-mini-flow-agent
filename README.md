@@ -1,17 +1,17 @@
 # 🎓 Mini Conversational Flow Agent
 
-A production-quality AI-powered college admission assistant built with **Next.js 15**, **Google Gemini**, and a **JSON-driven flow engine**. The conversation is entirely data-driven — no flow logic lives in TypeScript.
+A production-quality AI-powered college admission assistant built with **Next.js 15**, **OpenRouter**, and a **JSON-driven flow engine**. The conversation is entirely data-driven — no flow logic lives in TypeScript.
 
 ---
 
 ## ✨ Features
 
 - 🤖 **Flow Engine** — walks a JSON graph of `prompt`, `collect`, and `condition` nodes
-- 🧠 **Gemini Integration** — intent classification (`YES / NO / UNCLEAR`) and natural language generation
-- 🔒 **Secure by design** — API key never leaves the server; no client-side Gemini calls
+- 🧠 **OpenRouter Integration** — intent classification (`YES / NO / UNCLEAR`) and natural language generation using Meta Llama 3.3 70B Instruct (free)
+- 🔒 **Secure by design** — API key never leaves the server; no client-side LLM calls
 - 💬 **Variable substitution** — `{{name}}`, `{{email}}`, `{{course}}` filled from collected answers
 - 🎨 **Premium UI** — glassmorphism dark theme, animated typing indicator, auto-scroll
-- 🧪 **Automated tests** — Jest + Gemini fully mocked; zero real API calls during testing
+- 🧪 **Automated tests** — Jest + LLM fully mocked; zero real API calls during testing
 
 ---
 
@@ -22,7 +22,7 @@ A production-quality AI-powered college admission assistant built with **Next.js
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS v3 |
-| LLM | Google Gemini 2.5 Flash |
+| LLM | Meta Llama 3.3 70B Instruct (via OpenRouter) |
 | Testing | Jest + Babel |
 | Deployment | Vercel |
 
@@ -34,7 +34,7 @@ A production-quality AI-powered college admission assistant built with **Next.js
 
 - Node.js 18+ (LTS recommended)
 - npm or yarn
-- A Google Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
+- An OpenRouter API key ([Get one here](https://openrouter.ai/))
 
 ### 2. Installation
 
@@ -46,14 +46,14 @@ cd "INBOTIQ assignment"
 npm install
 ```
 
-### 3. Add your Gemini API Key
+### 3. Add your OpenRouter API Key
 
 ```bash
 # Copy the example env file
 cp .env.example .env.local
 
 # Open .env.local and add your key
-# GEMINI_API_KEY=your_actual_key_here
+# OPENROUTER_API_KEY=your_actual_key_here
 ```
 
 > ⚠️ **Never commit `.env.local`** — it is already in `.gitignore`
@@ -81,7 +81,7 @@ npm run test:watch
 npm run test:coverage
 ```
 
-Tests are in `/tests/` and mock the Gemini API — **no real API calls are made during testing**.
+Tests are in `/tests/` and mock the OpenRouter API — **no real API calls are made during testing**.
 
 ---
 
@@ -98,7 +98,7 @@ vercel deploy
 
 1. Push your code to a GitHub repository
 2. Go to [vercel.com](https://vercel.com) → New Project → Import your repo
-3. Add `GEMINI_API_KEY` in **Project Settings → Environment Variables**
+3. Add `OPENROUTER_API_KEY` in **Project Settings → Environment Variables**
 4. Click **Deploy**
 
 > The project is zero-config for Vercel — Next.js is auto-detected.
@@ -126,7 +126,7 @@ INBOTIQ assignment/
 ├── lib/
 │   ├── types.ts                 # All shared TypeScript types
 │   ├── state.ts                 # Pure, immutable state functions
-│   ├── llm.ts                   # ONLY Gemini file: generatePrompt() + classifyIntent()
+│   ├── llm.ts                   # ONLY LLM/OpenRouter file: generatePrompt() + classifyIntent()
 │   └── flowEngine.ts            # Flow walker: prompt / collect / condition nodes
 │
 ├── flows/
@@ -179,7 +179,7 @@ The `ConversationState` is a plain JSON object that travels with every request �
 |---|---|
 | `prompt` | Sends a bot message, auto-advances |
 | `collect` | Asks a question, stores answer in `variables` |
-| `condition` | Classifies user input with Gemini → branches to YES/NO/UNCLEAR node |
+| `condition` | Classifies user input with OpenRouter (Llama 3.3 70B) → branches to YES/NO/UNCLEAR node |
 
 ---
 
@@ -195,7 +195,7 @@ The `ConversationState` is a plain JSON object that travels with every request �
 
 | Variable | Required | Description |
 |---|---|---|
-| `GEMINI_API_KEY` | ✅ Yes | Your Google Gemini API key |
+| `OPENROUTER_API_KEY` | ✅ Yes | Your OpenRouter API key (fallback support for `GEMINI_API_KEY` is also present) |
 
 ---
 

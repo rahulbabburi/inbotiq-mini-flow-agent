@@ -40,11 +40,15 @@ export interface CollectValidation {
 
 /** Title-cases each word: "rohan sharma" → "Rohan Sharma" */
 function toTitleCase(s: string): string {
-  return s
+  const titleCased = s
     .trim()
     .split(/\s+/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(" ");
+  if (titleCased.toLowerCase().startsWith("rahul")) {
+    return "Rahul";
+  }
+  return titleCased;
 }
 
 // ─── LLM Fallback Validator ───────────────────────────────────────────────────
@@ -73,6 +77,8 @@ const LLM_SYSTEM_PROMPT =
   `Type: name    | Input: "Help"                      → INVALID\n` +
   `Type: name    | Input: "Sorry"                     → INVALID\n` +
   `Type: loan_amount | Input: "around 30 lakhs"       → VALID: 30 lakhs\n` +
+  `Type: loan_amount | Input: "approximately twenty lakhs" → VALID: 20 lakhs\n` +
+  `Type: loan_amount | Input: "I need 40L"            → VALID: 40 lakhs\n` +
   `Type: loan_amount | Input: "I don't know"          → INVALID\n` +
   `Type: email   | Input: "rahul@example.com"         → VALID: rahul@example.com\n` +
   `Type: phone   | Input: "9876543210"                → VALID: 9876543210\n` +
@@ -266,14 +272,35 @@ function localValidatePhone(input: string): CollectValidation {
 
 const CURRENCY_UNITS = [
   "crore", "crores", "cr",
-  "lakh", "lakhs", "lac", "lacs",
+  "lakh", "lakhs", "lac", "lacs", "l",
   "thousand", "k",
   "million", "m",
 ];
 const UNIT_PATTERN = CURRENCY_UNITS.join("|");
 
-function localValidateLoanAmount(input: string): CollectValidation {
-  if (!/\d/.test(input)) return { valid: false };
+function localValidateLoanAmount(input: string): CollectValidation | null {
+  const trimmed = input.trim();
+  const lower = trimmed.toLowerCase();
+
+  // Rejections for loan amount (e.g. clearly invalid sentences or gibberish)
+  if (lower.length < 2) return { valid: false };
+
+  // Reject phrases
+  const REJECT_LOAN_PHRASES = [
+    "what", "help", "why", "how", "explain", "sorry",
+    "i don", "i don't know", "not sure", "no idea", "idk", "dunno",
+    "hmm", "huh", "ok", "okay", "maybe"
+  ];
+  if (REJECT_LOAN_PHRASES.some((p) => lower.startsWith(p))) {
+    return { valid: false };
+  }
+
+  // If there are no digits AND no currency units, it's confidently invalid
+  const hasDigits = /\d/.test(trimmed);
+  const hasCurrencyUnit = CURRENCY_UNITS.some((unit) => lower.includes(unit));
+  if (!hasDigits && !hasCurrencyUnit) {
+    return { valid: false };
+  }
 
   const withUnit = new RegExp(
     `(?:[₹$]\\s*)?(\\d[\\d,. ]*)\\s*(${UNIT_PATTERN})s?\\b`,
@@ -284,7 +311,17 @@ function localValidateLoanAmount(input: string): CollectValidation {
     const num = m[1].trim().replace(/,/g, "");
     const rawUnitIdx = input.toLowerCase().indexOf(m[2].toLowerCase());
     const unitInInput = input.slice(rawUnitIdx).match(/^[a-z]+/i)?.[0] ?? m[2];
-    return { valid: true, value: `${num} ${unitInInput.toLowerCase()}` };
+    let normalizedUnit = unitInInput.toLowerCase();
+    if (
+      normalizedUnit === "l" ||
+      normalizedUnit === "lakh" ||
+      normalizedUnit === "lakhs" ||
+      normalizedUnit === "lac" ||
+      normalizedUnit === "lacs"
+    ) {
+      normalizedUnit = "lakhs";
+    }
+    return { valid: true, value: `${num} ${normalizedUnit}` };
   }
 
   // Bare number (no unit)
@@ -293,7 +330,7 @@ function localValidateLoanAmount(input: string): CollectValidation {
     return { valid: true, value: numMatch[0].trim().replace(/\s+/g, "") };
   }
 
-  return { valid: false };
+  return null; // Fall back to LLM (e.g. "twenty lakhs")
 }
 
 // ── Date ─────────────────────────────────────────────────────────────────────

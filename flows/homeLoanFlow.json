@@ -14,7 +14,7 @@
       "id": "ask_budget",
       "type": "collect",
       "question": "Great! Roughly what loan amount are you looking for?",
-      "variable": "budget",
+      "variable": "loanAmount",
       "expectedType": "loan_amount",
       "retryMessage": "I'm sorry, I didn't catch the loan amount. Could you tell me approximately how much loan you're looking for?",
       "next": "ask_name"
@@ -31,7 +31,7 @@
     {
       "id": "confirmation",
       "type": "prompt",
-      "message": "Thanks {{name}} — someone will call you about your {{budget}} enquiry shortly. 📞",
+      "message": "Thanks {{name}} — someone will call you about your {{loanAmount}} enquiry shortly. 📞",
       "next": null
     },
     {

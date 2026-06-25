@@ -132,6 +132,18 @@ async function processPromptNode(
   }
 
   const nextNode = getNode(nodeMap, node.next);
+  
+  // Log transition
+  console.log(`\n--- State Transition ---`);
+  console.log(`Current node: ${node.id}`);
+  console.log(`Node type: ${node.type}`);
+  console.log(`User message: N/A`);
+  console.log(`Extracted value: N/A`);
+  console.log(`Variables before: ${JSON.stringify(state.variables)}`);
+  console.log(`Variables after: ${JSON.stringify(updatedState.variables)}`);
+  console.log(`Next node: ${nextNode.id}`);
+  console.log(`------------------------\n`);
+
   updatedState = withCurrentNode(updatedState, nextNode.id);
 
   // Chain through consecutive prompt nodes (multi-part messages)
@@ -193,10 +205,21 @@ async function processCollectNode(
 
   // ── Valid input: store the normalised value and advance ───────────────────
   const storedValue = validation.value ?? trimmed;
-  console.log(`[Stored] ${node.variable} = "${storedValue}"`);
   let updatedState = withVariable(state, node.variable, storedValue);
 
   const nextNode = getNode(nodeMap, node.next);
+
+  // Log transition
+  console.log(`\n--- State Transition ---`);
+  console.log(`Current node: ${node.id}`);
+  console.log(`Node type: ${node.type}`);
+  console.log(`User message: "${userMessage}"`);
+  console.log(`Extracted value: ${storedValue}`);
+  console.log(`Variables before: ${JSON.stringify(state.variables)}`);
+  console.log(`Variables after: ${JSON.stringify(updatedState.variables)}`);
+  console.log(`Next node: ${nextNode.id}`);
+  console.log(`------------------------\n`);
+
   updatedState = withCurrentNode(updatedState, nextNode.id);
 
   return sendNextNodeQuestion(nextNode, updatedState, nodeMap);
@@ -233,6 +256,18 @@ async function processConditionNode(
     if (node.branches.UNCLEAR) {
       // Flow JSON specifies a custom UNCLEAR handler node
       const nextNode = getNode(nodeMap, node.branches.UNCLEAR);
+      
+      // Log transition
+      console.log(`\n--- State Transition ---`);
+      console.log(`Current node: ${node.id}`);
+      console.log(`Node type: ${node.type}`);
+      console.log(`User message: "${userMessage}"`);
+      console.log(`Extracted value: ${intent}`);
+      console.log(`Variables before: ${JSON.stringify(state.variables)}`);
+      console.log(`Variables after: ${JSON.stringify(state.variables)}`);
+      console.log(`Next node: ${nextNode.id}`);
+      console.log(`------------------------\n`);
+
       const updatedState = withCurrentNode(state, nextNode.id);
       return sendNextNodeQuestion(nextNode, updatedState, nodeMap);
     }
@@ -246,6 +281,18 @@ async function processConditionNode(
   // ── YES / NO: follow the branch ───────────────────────────────────────────
   const nextNodeId = node.branches[intent as "YES" | "NO"];
   const nextNode = getNode(nodeMap, nextNodeId);
+
+  // Log transition
+  console.log(`\n--- State Transition ---`);
+  console.log(`Current node: ${node.id}`);
+  console.log(`Node type: ${node.type}`);
+  console.log(`User message: "${userMessage}"`);
+  console.log(`Extracted value: ${intent}`);
+  console.log(`Variables before: ${JSON.stringify(state.variables)}`);
+  console.log(`Variables after: ${JSON.stringify(state.variables)}`);
+  console.log(`Next node: ${nextNode.id}`);
+  console.log(`------------------------\n`);
+
   const updatedState = withCurrentNode(state, nextNode.id);
 
   return sendNextNodeQuestion(nextNode, updatedState, nodeMap);

@@ -18,15 +18,10 @@ import type { ChatRequest, ChatResponse, Flow, ConversationState } from "@/lib/t
 
 // ─── Flow Loader (cached after first read) ────────────────────────────────────
 
-let cachedFlow: Flow | null = null;
-
 async function loadFlow(): Promise<Flow> {
-  if (cachedFlow) return cachedFlow;
-
   const flowPath = path.join(process.cwd(), "flows", "homeLoanFlow.json");
   const raw = await fs.readFile(flowPath, "utf-8");
-  cachedFlow = JSON.parse(raw) as Flow;
-  return cachedFlow;
+  return JSON.parse(raw) as Flow;
 }
 
 // ─── POST Handler ─────────────────────────────────────────────────────────────

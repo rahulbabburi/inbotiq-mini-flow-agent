@@ -60,6 +60,11 @@ interface OpenRouterResponse {
   error?: { message: string };
 }
 
+// Map GEMINI_API_KEY to OPENROUTER_API_KEY at module load time if needed
+if (process.env.GEMINI_API_KEY && !process.env.OPENROUTER_API_KEY) {
+  process.env.OPENROUTER_API_KEY = process.env.GEMINI_API_KEY;
+}
+
 // ─── API Key ──────────────────────────────────────────────────────────────────
 
 function getApiKey(): string {

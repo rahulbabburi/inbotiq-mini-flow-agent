@@ -6,11 +6,11 @@ The project is a fully functional conversational AI agent for college admissions
 
 - **End-to-end conversation flow**: The app walks through a 7-node JSON flow from a welcome message through name/email/course collection to a personalised confirmation or polite goodbye.
 - **Variable substitution**: Collected user inputs are embedded in subsequent messages using `{{name}}`, `{{email}}`, `{{course}}` placeholders that are replaced at runtime.
-- **Gemini intent classification**: Condition nodes send the user's response to Gemini 2.5 Flash with a zero-shot classification prompt. The model returns YES, NO, or UNCLEAR, and the engine branches accordingly.
+- **OpenRouter intent classification**: Condition nodes send the user's response to Meta Llama 3.3 70B Instruct (via OpenRouter) with a zero-shot classification prompt. The model returns YES, NO, or UNCLEAR, and the engine branches accordingly.
 - **Stateless API**: Every request carries the full `ConversationState` — no sessions, no database, no Redis. The client is the source of truth.
-- **Automated tests**: 12 tests covering variable substitution, node map building, condition branching (YES/NO/UNCLEAR), collect node behaviour, prompt node auto-advance, and LLM normalisation. All tests run without real Gemini API calls.
+- **Automated tests**: 12 tests covering variable substitution, node map building, condition branching (YES/NO/UNCLEAR), collect node behaviour, prompt node auto-advance, and LLM normalisation. All tests run without real OpenRouter API calls.
 - **Premium UI**: Dark glassmorphism theme, animated typing indicator, optimistic message rendering, auto-scroll, and responsive layout.
-- **Vercel-ready**: Zero config beyond adding the `GEMINI_API_KEY` environment variable.
+- **Vercel-ready**: Zero config beyond adding the `OPENROUTER_API_KEY` environment variable (with fallback support for `GEMINI_API_KEY` also supported).
 
 ---
 
@@ -24,7 +24,7 @@ The codebase is organised around four responsibilities:
 |---|---|
 | `lib/types.ts` | All TypeScript types — single source of truth |
 | `lib/state.ts` | Pure state manipulation — no side effects |
-| `lib/llm.ts` | All Gemini calls — `generatePrompt` and `classifyIntent` only |
+| `lib/llm.ts` | All OpenRouter/LLM calls — `generatePrompt` and `classifyIntent` only |
 | `lib/flowEngine.ts` | Flow traversal — reads nodes, substitutes variables, calls `llm.ts` |
 | `app/api/chat/route.ts` | HTTP handler — wires everything together |
 | `components/` | UI — pure presentation, no business logic |
@@ -51,9 +51,9 @@ By storing the flow in `admissionFlow.json` instead of TypeScript, the conversat
 
 ## Assumptions
 
-1. **Gemini 2.5 Flash is the model** — chosen for its speed and cost-efficiency in a conversational setting. To switch models, change the `GEMINI_MODEL` constant in `lib/llm.ts` — no other file needs updating.
+1. **Meta Llama 3.3 70B Instruct is the model** — chosen for its strong reasoning and cost-efficiency in a conversational setting, accessed via OpenRouter. To switch models or providers, change the constants in `lib/llm.ts` — no other file needs updating.
 
-2. **Intent classification returns a single word** — the prompt to Gemini is engineered to constrain output to `YES`, `NO`, or `UNCLEAR`. Any unexpected output defaults to `UNCLEAR` (fail-safe).
+2. **Intent classification returns a single word** — the prompt to the LLM is engineered to constrain output to `YES`, `NO`, or `UNCLEAR`. Any unexpected output defaults to `UNCLEAR` (fail-safe).
 
 3. **No authentication** — the assignment spec doesn't require user accounts. A production version would add NextAuth or Clerk.
 
@@ -75,9 +75,9 @@ The trickiest design decision was making `ConversationState` fully serialisable 
 
 When a `prompt` node has a `next` pointing to another `prompt`, or when a `collect` answer needs to immediately show the next question, the engine needs to chain node processing within a single API call. This was handled by having each node processor look ahead at the next node and render its content as part of the same reply.
 
-### 3. Gemini Prompt Engineering
+### 3. OpenRouter / Llama Prompt Engineering
 
-Getting Gemini to reliably return exactly `YES`, `NO`, or `UNCLEAR` required careful prompt engineering. The final prompt:
+Getting the LLM to reliably return exactly `YES`, `NO`, or `UNCLEAR` required careful prompt engineering. The final prompt:
 - States the exact constraint ("ONLY the label")
 - Gives explicit definitions for each label
 - Lists rules (e.g., "polite declines count as NO")
@@ -92,7 +92,7 @@ Testing TypeScript modules that use Next.js path aliases (`@/lib/...`) required 
 ## Future Improvements
 
 ### Short-term
-- **Streaming responses**: Use Gemini's streaming API with Next.js `StreamingTextResponse` to show tokens as they arrive, reducing perceived latency
+- **Streaming responses**: Use the LLM's streaming API with Next.js `StreamingTextResponse` to show tokens as they arrive, reducing perceived latency
 - **Conversation persistence**: Store conversations in a database (e.g., Supabase, PlanetScale) so users can resume sessions
 - **Rich message types**: Support image cards, option buttons, and quick replies in addition to plain text
 
@@ -102,7 +102,7 @@ Testing TypeScript modules that use Next.js path aliases (`@/lib/...`) required 
 - **Analytics dashboard**: Track conversation completion rates, drop-off nodes, and common UNCLEAR responses
 
 ### Long-term
-- **LLM-generated collect validation**: Use Gemini to validate that collected values are plausible (e.g., "is this a valid email format?") before storing them
+- **LLM-generated collect validation**: Use the LLM to validate that collected values are plausible (e.g., "is this a valid email format?") before storing them
 - **Human handoff**: Detect when the user is frustrated and escalate to a live agent via a WebSocket integration
-- **Multilingual support**: Use Gemini's multilingual capabilities to automatically respond in the user's language
+- **Multilingual support**: Use the LLM's multilingual capabilities to automatically respond in the user's language
 - **A/B testing flows**: Support multiple flow variants and track conversion rates per variant
