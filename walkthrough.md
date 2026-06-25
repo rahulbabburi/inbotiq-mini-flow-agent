@@ -1,49 +1,52 @@
-# Diagnosis and Fix Walkthrough: `Cannot find module './447.js'`
+# Diagnosis and Fix Walkthrough: CSS `@import` Placement Error (Next.js 16/Vercel)
 
-We diagnosed and resolved the runtime module error `Error: Cannot find module './447.js'` caused by a stale Next.js compilation cache.
+We resolved the compilation error `@import rules must precede all rules aside from @charset and @layer statements` occurring in `app/globals.css`.
 
 ---
 
 ## 1. Root Cause Analysis
-
-### Why module `447.js` could not be found
-Next.js uses Webpack/Turbopack to compile code during development. It splits the application into dynamically loaded chunks (like `447.js`, `4bd1b696-4871f2eb47c9745a.js`, etc.).
-- When files are modified, deleted, or refactored during runtime, the compiler generates new chunks with updated hashes.
-- If the development server cache (`.next`) gets out of sync, the running application continues referencing old compiled chunks (e.g., `./447.js`) that no longer exist on disk.
-- This results in a runtime crash: `Error: Cannot find module './447.js'`.
+In CSS and PostCSS specifications, all `@import` statements must precede any other style rules (such as custom properties, keyframes, utilities, and standard selectors).
+* In [app/globals.css](file:///c:/Users/Babburi%20Rahul%20Goud/Desktop/INBOTIQ%20assignment/app/globals.css), the `@import` statement for Google Fonts appeared after the `@tailwind base;` directive.
+* Under Next.js 16's Turbopack and Vercel's build pipeline, `@tailwind base` compiles into actual style declarations, causing the subsequent `@import` to become invalid CSS and crash the compiler.
 
 ---
 
 ## 2. Actions Taken & Fixes Applied
 
-1. **Cleaned Build Cache**: Deleted the stale `.next` directory to force Next.js to regenerate fresh chunk mappings.
-2. **Restored Dependencies**: Ran `npm install` to ensure all package dependencies are clean and correctly installed.
-3. **Clean Rebuild**: Ran `npm run build` to perform a clean production build check. The build compiled successfully with zero errors.
-4. **Started Dev Server**: Executed `npm run dev` to verify the development server starts, binds to the port, and compiles the `/` and `/api/chat` routes with 200 HTTP statuses.
-5. **No File Changes Needed**: Verified that all imports, dynamic imports, and relative paths in the source files are correct. No application logic, API routes, or flows were changed, preserving the integrity of the project.
+1. **Removed `@import` from CSS**:
+   * Removed `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');` from [app/globals.css](file:///c:/Users/Babburi%20Rahul%20Goud/Desktop/INBOTIQ%20assignment/app/globals.css).
+2. **Integrated Next.js native Google Font API**:
+   * Imported `Inter` from `next/font/google` in [app/layout.tsx](file:///c:/Users/Babburi%20Rahul%20Goud/Desktop/INBOTIQ%20assignment/app/layout.tsx).
+   * Loaded the font with subsets `["latin"]` and weights `["300", "400", "500", "600", "700"]`, setting it up with the CSS variable `--font-inter`.
+   * Applied the font class `inter.className` and variable `inter.variable` to the `<body>` element.
+3. **Mapped Tailwind's Font Family Config**:
+   * Updated [tailwind.config.ts](file:///c:/Users/Babburi%20Rahul%20Goud/Desktop/INBOTIQ%20assignment/tailwind.config.ts) so that the `sans` family list starts with `var(--font-inter)` (referencing the native Google font).
+   * Updated `body` selector in [app/globals.css](file:///c:/Users/Babburi%20Rahul%20Goud/Desktop/INBOTIQ%20assignment/app/globals.css) to set `font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;`.
+4. **Preserved UI & Logic**:
+   * The application's UI, design parameters, animations, components, layout, and backend logic were preserved exactly as-is.
 
 ---
 
 ## 3. Verification Results
 
 ### Production Build Verification
-`npm run build` passed successfully with the following output:
+`npm run build` completed successfully on Next.js 16 (Turbopack) with 0 compiler errors or warnings:
 ```
-Creating an optimized production build ...
-✓ Compiled successfully in 4.0s
-Linting and checking validity of types ...
-Collecting page data ...
-✓ Generating static pages (5/5)
-Finalizing page optimization ...
-Collecting build traces ...
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.4s
+  Running TypeScript ...
+  Finished TypeScript in 4.4s ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/4) ...
+✓ Generating static pages using 5 workers (4/4) in 1083ms
+  Finalizing page optimization ...
 ```
 
 ### Dev Server Verification
-`npm run dev` started successfully on `http://localhost:3000`. The server successfully compiles and serves requests:
-- `GET / 200`
-- `POST /api/chat 200`
+`npm run dev` starts successfully without errors on `http://localhost:3000`.
 
 ### Test Suite Verification
-All unit tests in the Jest test suite pass successfully:
-- **Total Test Suites**: 4 passed, 4 total
-- **Total Tests**: 156 passed, 156 total
+All 156 Jest tests pass cleanly.

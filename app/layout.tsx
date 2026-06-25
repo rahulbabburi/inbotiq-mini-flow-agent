@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Home Loan Enquiry Assistant — JSON Flow Engine",
@@ -34,7 +41,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased h-full">{children}</body>
+      <body className={`${inter.className} ${inter.variable} antialiased h-full`}>
+        {children}
+      </body>
     </html>
   );
 }
