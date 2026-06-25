@@ -133,13 +133,16 @@ INBOTIQ assignment/
 │   └── homeLoanFlow.json        # 5-node Home Loan Enquiry flow (pure data)
 │
 ├── tests/
-│   ├── flowEngine.test.ts       # Flow engine + variable substitution tests
-│   └── llm.test.ts              # LLM service normalisation tests
+│   ├── collectValidator.test.ts # Input validation (loan amount, name, etc.)
+│   ├── flowEngine.test.ts       # Flow engine traversal and routing
+│   ├── llm.test.ts              # LLM client integration
+│   ├── validator.test.ts        # Validator pipeline logic
+│   └── workflowBug.test.ts      # End-to-end happy path and retry validation
 │
 ├── .env.example                 # Environment variable template
 ├── next.config.ts               # Next.js config
 ├── tailwind.config.ts           # Tailwind design tokens
-├── jest.config.ts               # Jest configuration
+├── jest.config.js               # Jest configuration
 ├── README.md
 └── WRITEUP.md
 ```
@@ -168,7 +171,7 @@ The `ConversationState` is a plain JSON object that travels with every request �
 ```typescript
 {
   currentNode: string;           // Which node we're at
-  variables: Record<string, string>; // Collected answers (name, email, course)
+  variables: Record<string, string>; // Collected answers (name, loanAmount)
   history: ChatMessage[];        // Full message history for the UI
 }
 ```
