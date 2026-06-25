@@ -314,23 +314,42 @@ function localValidateLoanAmount(input: string): CollectValidation | null {
     return { valid: false };
   }
 
+  // Pre-process common words to digits
+  const wordMap: Record<string, string> = {
+    "one and a half": "1.5",
+    "two and a half": "2.5",
+    "three and a half": "3.5",
+    "twenty five": "25", "seventy five": "75",
+    "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
+    "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10",
+    "eleven": "11", "twelve": "12", "thirteen": "13", "fourteen": "14", "fifteen": "15",
+    "sixteen": "16", "seventeen": "17", "eighteen": "18", "nineteen": "19", "twenty": "20",
+    "thirty": "30", "forty": "40", "fifty": "50",
+    "sixty": "60", "seventy": "70", "eighty": "80", "ninety": "90"
+  };
+  
+  let processedInput = lower;
+  for (const [word, digit] of Object.entries(wordMap)) {
+    const regex = new RegExp(`\\b${word}\\b`, "g");
+    processedInput = processedInput.replace(regex, digit);
+  }
+
   // If there are no digits AND no currency units, it's confidently invalid
-  const hasDigits = /\d/.test(trimmed);
-  const hasCurrencyUnit = CURRENCY_UNITS.some((unit) => lower.includes(unit));
+  const hasDigits = /\d/.test(processedInput);
+  const hasCurrencyUnit = CURRENCY_UNITS.some((unit) => processedInput.includes(unit)) || processedInput.includes("cro");
   if (!hasDigits && !hasCurrencyUnit) {
     return { valid: false };
   }
 
   const withUnit = new RegExp(
-    `(?:[₹$]\\s*)?(\\d[\\d,. ]*)\\s*(${UNIT_PATTERN})s?\\b`,
+    `(?:[₹$]\\s*)?(\\d[\\d,. ]*)\\s*(${UNIT_PATTERN}|cro)s?\\b`,
     "i"
   );
-  const m = input.match(withUnit);
+  const m = processedInput.match(withUnit);
   if (m) {
     const num = m[1].trim().replace(/,/g, "");
-    const rawUnitIdx = input.toLowerCase().indexOf(m[2].toLowerCase());
-    const unitInInput = input.slice(rawUnitIdx).match(/^[a-z]+/i)?.[0] ?? m[2];
-    let normalizedUnit = unitInInput.toLowerCase();
+    let normalizedUnit = m[2].toLowerCase();
+    
     if (
       normalizedUnit === "l" ||
       normalizedUnit === "lakh" ||
@@ -342,7 +361,8 @@ function localValidateLoanAmount(input: string): CollectValidation | null {
     } else if (
       normalizedUnit === "cr" ||
       normalizedUnit === "crore" ||
-      normalizedUnit === "crores"
+      normalizedUnit === "crores" ||
+      normalizedUnit === "cro"
     ) {
       normalizedUnit = "crore";
     } else if (
@@ -360,12 +380,12 @@ function localValidateLoanAmount(input: string): CollectValidation | null {
   }
 
   // Bare number (no unit)
-  const numMatch = input.match(/[₹$]?\s*[\d][\d,. ]*/);
+  const numMatch = processedInput.match(/[₹$]?\s*[\d][\d,. ]*/);
   if (numMatch) {
     return { valid: true, value: numMatch[0].trim().replace(/\s+/g, "") };
   }
 
-  return null; // Fall back to LLM (e.g. "twenty lakhs")
+  return null; // Fall back to LLM (e.g. if a word wasn't covered)
 }
 
 // ── Date ─────────────────────────────────────────────────────────────────────
