@@ -2,13 +2,13 @@
 
 ## What Works
 
-The project is a fully functional conversational AI agent for college admissions:
+The project is a fully functional conversational AI agent for home loan enquiries:
 
-- **End-to-end conversation flow**: The app walks through a 7-node JSON flow from a welcome message through name/email/course collection to a personalised confirmation or polite goodbye.
-- **Variable substitution**: Collected user inputs are embedded in subsequent messages using `{{name}}`, `{{email}}`, `{{course}}` placeholders that are replaced at runtime.
+- **End-to-end conversation flow**: The app walks through a 5-node JSON flow from a welcome message (`check_person`), through budget and name collection (`ask_budget` and `ask_name`), to a personalised confirmation (`confirmation`) or a polite goodbye (`goodbye`).
+- **Variable substitution**: Collected user inputs are embedded in subsequent messages using `{{name}}` and `{{loanAmount}}` placeholders that are replaced at runtime.
 - **OpenRouter intent classification**: Condition nodes send the user's response to Meta Llama 3.3 70B Instruct (via OpenRouter) with a zero-shot classification prompt. The model returns YES, NO, or UNCLEAR, and the engine branches accordingly.
 - **Stateless API**: Every request carries the full `ConversationState` — no sessions, no database, no Redis. The client is the source of truth.
-- **Automated tests**: 12 tests covering variable substitution, node map building, condition branching (YES/NO/UNCLEAR), collect node behaviour, prompt node auto-advance, and LLM normalisation. All tests run without real OpenRouter API calls.
+- **Automated tests**: 159 automated tests across 5 test suites covering variable substitution, node map building, condition branching (YES/NO/UNCLEAR), collect node behavior, prompt node auto-advance, and state transition correctness. All tests run without real OpenRouter API calls.
 - **Premium UI**: Dark glassmorphism theme, animated typing indicator, optimistic message rendering, auto-scroll, and responsive layout.
 - **Vercel-ready**: Zero config beyond adding the `OPENROUTER_API_KEY` environment variable (with fallback support for `GEMINI_API_KEY` also supported).
 
@@ -40,7 +40,7 @@ Instead of storing session state on the server, the full `ConversationState` is 
 
 ### Why a JSON Flow?
 
-By storing the flow in `admissionFlow.json` instead of TypeScript, the conversation logic becomes:
+By storing the flow in `homeLoanFlow.json` instead of TypeScript, the conversation logic becomes:
 
 - **Editable without redeployment** (on platforms with external config)
 - **Readable by non-engineers**
@@ -59,7 +59,7 @@ By storing the flow in `admissionFlow.json` instead of TypeScript, the conversat
 
 4. **No persistence** — conversation history lives in React state and the `ConversationState` JSON. Refreshing the page starts a new conversation. A production version would use a database.
 
-5. **One active flow** — the app loads `admissionFlow.json` at runtime. The architecture supports multiple flows with minor changes to the API route.
+5. **One active flow** — the app loads `homeLoanFlow.json` at runtime. The architecture supports multiple flows with minor changes to the API route.
 
 6. **Optimistic UI** — user messages are rendered immediately before the API responds, improving perceived performance.
 
@@ -85,7 +85,7 @@ Getting the LLM to reliably return exactly `YES`, `NO`, or `UNCLEAR` required ca
 
 ### 4. Jest + Next.js Module Resolution
 
-Testing TypeScript modules that use Next.js path aliases (`@/lib/...`) required configuring `moduleNameMapper` in `jest.config.ts`. Using `babel-jest` with `@babel/preset-typescript` avoids the complexity of `ts-jest` while still providing full TypeScript support in tests.
+Testing TypeScript modules that use Next.js path aliases (`@/lib/...`) required configuring `moduleNameMapper` in `jest.config.js`. Using `babel-jest` with `@babel/preset-typescript` avoids the complexity of `ts-jest` while still providing full TypeScript support in tests.
 
 ---
 

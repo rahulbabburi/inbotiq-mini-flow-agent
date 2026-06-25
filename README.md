@@ -1,6 +1,6 @@
 # 🎓 Mini Conversational Flow Agent
 
-A production-quality AI-powered college admission assistant built with **Next.js 15**, **OpenRouter**, and a **JSON-driven flow engine**. The conversation is entirely data-driven — no flow logic lives in TypeScript.
+A production-quality AI-powered home loan enquiry assistant built with **Next.js 16**, **OpenRouter**, and a **JSON-driven flow engine**. The conversation is entirely data-driven — no flow logic lives in TypeScript.
 
 ---
 
@@ -9,7 +9,7 @@ A production-quality AI-powered college admission assistant built with **Next.js
 - 🤖 **Flow Engine** — walks a JSON graph of `prompt`, `collect`, and `condition` nodes
 - 🧠 **OpenRouter Integration** — intent classification (`YES / NO / UNCLEAR`) and natural language generation using Meta Llama 3.3 70B Instruct (free)
 - 🔒 **Secure by design** — API key never leaves the server; no client-side LLM calls
-- 💬 **Variable substitution** — `{{name}}`, `{{email}}`, `{{course}}` filled from collected answers
+- 💬 **Variable substitution** — `{{name}}` and `{{loanAmount}}` filled from collected answers
 - 🎨 **Premium UI** — glassmorphism dark theme, animated typing indicator, auto-scroll
 - 🧪 **Automated tests** — Jest + LLM fully mocked; zero real API calls during testing
 
@@ -19,7 +19,7 @@ A production-quality AI-powered college admission assistant built with **Next.js
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS v3 |
 | LLM | Meta Llama 3.3 70B Instruct (via OpenRouter) |
@@ -130,7 +130,7 @@ INBOTIQ assignment/
 │   └── flowEngine.ts            # Flow walker: prompt / collect / condition nodes
 │
 ├── flows/
-│   └── admissionFlow.json       # 7-node College Admission flow (pure data)
+│   └── homeLoanFlow.json        # 5-node Home Loan Enquiry flow (pure data)
 │
 ├── tests/
 │   ├── flowEngine.test.ts       # Flow engine + variable substitution tests
@@ -152,7 +152,7 @@ Browser
       │  POST /api/chat  { message, conversationState }
       ▼
     app/api/chat/route.ts
-      │  reads flows/admissionFlow.json
+      │  reads flows/homeLoanFlow.json
       │  calls lib/flowEngine.processMessage()
       │     └─ calls lib/llm.classifyIntent() for condition nodes
       │     └─ calls lib/llm.generatePrompt() (optional enrichment)
@@ -186,7 +186,7 @@ The `ConversationState` is a plain JSON object that travels with every request �
 ## 📝 Adding a New Flow
 
 1. Create a new JSON file in `/flows/`
-2. Follow the same schema as `admissionFlow.json`
+2. Follow the same schema as `homeLoanFlow.json`
 3. Update `app/api/chat/route.ts` to load your new flow file
 
 ---
