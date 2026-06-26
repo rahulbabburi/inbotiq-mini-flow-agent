@@ -8,7 +8,7 @@ The project is a fully functional conversational AI agent for home loan enquirie
 - **Variable substitution**: Collected user inputs are embedded in subsequent messages using `{{name}}` and `{{loanAmount}}` placeholders that are replaced at runtime.
 - **OpenRouter intent classification**: Condition nodes send the user's response to Meta Llama 3.3 70B Instruct (via OpenRouter) with a zero-shot classification prompt. The model returns YES, NO, or UNCLEAR, and the engine branches accordingly.
 - **Stateless API**: Every request carries the full `ConversationState` — no sessions, no database, no Redis. The client is the source of truth.
-- **Automated tests**: 159 automated tests across 5 test suites covering variable substitution, node map building, condition branching (YES/NO/UNCLEAR), collect node behavior, prompt node auto-advance, and state transition correctness. All tests run without real OpenRouter API calls.
+- **Automated tests**: 173 automated tests across 5 test suites covering variable substitution, node map building, condition branching (YES/NO/UNCLEAR), collect node behavior, prompt node auto-advance, and state transition correctness. All tests run without real OpenRouter API calls.
 - **Premium UI**: Dark glassmorphism theme, animated typing indicator, optimistic message rendering, auto-scroll, and responsive layout.
 - **Vercel-ready**: Zero config beyond adding the `OPENROUTER_API_KEY` environment variable (with fallback support for `GEMINI_API_KEY` also supported).
 

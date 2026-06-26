@@ -11,7 +11,7 @@ A production-quality AI-powered home loan enquiry assistant built with **Next.js
 - 🔒 **Secure by design** — API key never leaves the server; no client-side LLM calls
 - 💬 **Variable substitution** — `{{name}}` and `{{loanAmount}}` filled from collected answers
 - 🎨 **Premium UI** — glassmorphism dark theme, animated typing indicator, auto-scroll
-- 🧪 **Automated tests** — Jest + LLM fully mocked; zero real API calls during testing
+- 🧪 **Automated tests** — Jest + LLM fully mocked; 173 passing tests with zero real API calls during testing
 
 ---
 
